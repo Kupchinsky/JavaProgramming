@@ -4,7 +4,7 @@ public class Main
 {
     public static void main(String[] args)
     {
-	    Rect rect1 = new Rect(1, 2, 3, 4);
+	    /*Rect rect1 = new Rect(1, 2, 3, 4);
 	    Rect rect2 = new Rect(100, 200);
 	    Rect rect3 = new Rect();
 
@@ -24,11 +24,14 @@ public class Main
 	    System.out.println("Rect4: " + rect4);
 
 	    Rect rect5 = new ColoredRect();
+	    ((ColoredRect)rect5).setColorFull(Color.RED);
+	    ((ColoredRect)rect5).setColorGrani(Color.BLACK);
 	    ((ColoredRect)rect5).draw(null);
 
 	    System.out.println("Rect5: " + rect5);
 
 	    Rect rect6 = new DrawableRect();
+	    ((DrawableRect)rect6).setColorGrani(Color.black);
 	    ((DrawableRect)rect6).draw(null);
 
 	    System.out.println("Rect6: " + rect6);
@@ -46,6 +49,6 @@ public class Main
 	    System.out.println("DynArray1: " + darr1);
 
 	    darr3.setLength(1);
-	    System.out.println("DynArray3: " + darr3);
+	    System.out.println("DynArray3: " + darr3);*/
     }
 }

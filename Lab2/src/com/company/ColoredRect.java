@@ -15,6 +15,11 @@ public class ColoredRect extends DrawableRect
 	@Setter(AccessLevel.PACKAGE)
 	private Color colorFull = null;
 
+	ColoredRect(int width, int height)
+	{
+		super(width, height);
+	}
+
 	@Override
 	void draw(Graphics gr)
 	{

@@ -11,9 +11,14 @@ import java.awt.*;
  */
 class DrawableRect extends Rect
 {
-	@Getter(AccessLevel.PROTECTED)
-	@Setter(AccessLevel.PROTECTED)
+	@Getter(AccessLevel.PACKAGE)
+	@Setter(AccessLevel.PACKAGE)
 	private Color colorGrani = null;
+
+	DrawableRect(int width, int height)
+	{
+		super(width, height);
+	}
 
 	void draw(Graphics gr)
 	{
