@@ -2,9 +2,9 @@ package com.company;
 
 public class Main
 {
-    public static void main(String[] args)
-    {
-	    /*Rect rect1 = new Rect(1, 2, 3, 4);
+	public static void main(String[] args)
+	{
+		/*Rect rect1 = new Rect(1, 2, 3, 4);
 	    Rect rect2 = new Rect(100, 200);
 	    Rect rect3 = new Rect();
 
@@ -50,5 +50,5 @@ public class Main
 
 	    darr3.setLength(1);
 	    System.out.println("DynArray3: " + darr3);*/
-    }
+	}
 }

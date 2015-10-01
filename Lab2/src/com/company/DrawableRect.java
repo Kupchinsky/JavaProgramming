@@ -23,8 +23,11 @@ class DrawableRect extends Rect
 	void draw(Graphics gr)
 	{
 		gr.setColor(this.colorGrani);
-		gr.drawRect(this.getX1(), this.getY1(), this.getX2() - this.getX1(), this.getY2() - this.getY1());
+		gr.drawRect(this.getX1(),
+					this.getY1(),
+					this.getX2() - this.getX1(),
+					this.getY2() - this.getY1());
 
-		System.out.println("DrawableRect.draw (" + this.colorGrani + ")");
+		//System.out.println("DrawableRect.draw (" + this.colorGrani + ")");
 	}
 }

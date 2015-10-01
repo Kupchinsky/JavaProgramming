@@ -34,7 +34,9 @@ class DynArray
 
 	void setLength(int newLength)
 	{
-		this.array = this.array != null ? Arrays.copyOf(this.array, newLength) : new Object[newLength];
+		this.array = this.array != null ?
+				Arrays.copyOf(this.array, newLength) :
+				new Object[newLength];
 	}
 
 	@Override
@@ -51,8 +53,7 @@ class DynArray
 				out += index + ": " + obj + "\n";
 				index++;
 			}
-		}
-		else
+		} else
 			out += "Array is null\n";
 
 		return out;

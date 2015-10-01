@@ -24,10 +24,13 @@ public class ColoredRect extends DrawableRect
 	void draw(Graphics gr)
 	{
 		gr.setColor(this.colorFull);
-		gr.fillRect(this.getX1(), this.getY1(), this.getX2() - this.getX1(), this.getY2() - this.getY1());
+		gr.fillRect(this.getX1(),
+					this.getY1(),
+					this.getX2() - this.getX1(),
+					this.getY2() - this.getY1());
 
 		super.draw(gr);
 
-		System.out.println("ColoredRect.draw (full: " + colorFull + ")");
+		//System.out.println("ColoredRect.draw (full: " + colorFull + ")");
 	}
 }
