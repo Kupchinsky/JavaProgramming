@@ -1,15 +1,15 @@
 package com.company;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
+import java.io.Serializable;
 
 /**
  * Created by killer on 10.09.2015.
  */
+@ToString
 @AllArgsConstructor
-class Rect
+class Rect implements Serializable
 {
 	@Getter(AccessLevel.PACKAGE)
 	@Setter(AccessLevel.PACKAGE)

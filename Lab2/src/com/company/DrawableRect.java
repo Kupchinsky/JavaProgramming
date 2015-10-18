@@ -28,6 +28,6 @@ class DrawableRect extends Rect
 					this.getX2() - this.getX1(),
 					this.getY2() - this.getY1());
 
-		//System.out.println("DrawableRect.draw (" + this.colorGrani + ")");
+		//System.out.println("DrawableRect.draw (" + this.colorGrani + ") " + super.toString());
 	}
 }
