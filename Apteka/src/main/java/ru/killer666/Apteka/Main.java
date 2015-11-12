@@ -1,4 +1,4 @@
-package sample;
+package ru.killer666.Apteka;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
