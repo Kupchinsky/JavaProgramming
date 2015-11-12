@@ -1,10 +1,8 @@
 package sample;
 
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -22,9 +20,37 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
+    private final TextField userField = new TextField();
+    private final PasswordField passwordField = new PasswordField();
+    private final Text status = new Text();
+
+    private void createFields(GridPane pane)
+    {
+        pane.add(new Label("Пользователь:"), 0, 1);
+        pane.add(this.userField, 1, 1);
+        pane.add(new Label("Пароль:"), 0, 2);
+        pane.add(this.passwordField, 1, 2);
+        pane.add(this.status, 1, 6);
+    }
+
+    private void createLogo(GridPane pane, Stage stage)
+    {
+        final ImageView imv = new ImageView();
+        final Image image2 = new Image(Main.class.getResourceAsStream("logo.jpg"));
+        imv.setImage(image2);
+
+        final HBox pictureRegion = new HBox();
+
+        pictureRegion.getChildren().add(imv);
+        pane.add(pictureRegion, 1, 0);
+
+        Text scenetitle = new Text(stage.getTitle());
+        scenetitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        pane.add(scenetitle, 0, 0);
+    }
+
     @Override
-    public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
+    public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Аптека \"Рашнаптек груп\"");
 
         GridPane grid = new GridPane();
@@ -33,30 +59,8 @@ public class Main extends Application {
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
 
-        final ImageView imv = new ImageView();
-        final Image image2 = new Image(Main.class.getResourceAsStream("button.jpg"));
-        imv.setImage(image2);
-
-        final HBox pictureRegion = new HBox();
-
-        pictureRegion.getChildren().add(imv);
-        grid.add(pictureRegion, 1, 0);
-
-        Text scenetitle = new Text(primaryStage.getTitle());
-        scenetitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
-        grid.add(scenetitle, 0, 0);
-
-        Label userName = new Label("Пользователь:");
-        grid.add(userName, 0, 1);
-
-        TextField userTextField = new TextField();
-        grid.add(userTextField, 1, 1);
-
-        Label pw = new Label("Пароль:");
-        grid.add(pw, 0, 2);
-
-        PasswordField pwBox = new PasswordField();
-        grid.add(pwBox, 1, 2);
+        this.createLogo(grid, primaryStage);
+        this.createFields(grid);
 
         Button btn = new Button("Войти");
         HBox hbBtn = new HBox(10);
@@ -64,12 +68,9 @@ public class Main extends Application {
         hbBtn.getChildren().add(btn);
         grid.add(hbBtn, 1, 4);
 
-        final Text actiontarget = new Text();
-        grid.add(actiontarget, 1, 6);
-
         btn.setOnAction(e -> {
-            actiontarget.setFill(Color.FORESTGREEN);
-            actiontarget.setText("Sign in button pressed");
+            this.status.setFill(Color.FORESTGREEN);
+            this.status.setText("Sign in button pressed");
         });
 
         Scene scene = new Scene(grid, 550, 500);
