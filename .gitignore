@@ -1,4 +1,8 @@
 *.iml
-.idea/
-*.class
 *.txt
+*.db
+*.log*
+
+**/.idea/
+**/target/
+**/out/
