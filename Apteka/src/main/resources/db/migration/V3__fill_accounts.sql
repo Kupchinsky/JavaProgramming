@@ -1,14 +1,18 @@
 -- Delete test data
+SET REFERENTIAL_INTEGRITY FALSE;
+
 TRUNCATE TABLE `users`;
 TRUNCATE TABLE `resources_users`;
 TRUNCATE TABLE `resources`;
+
+SET REFERENTIAL_INTEGRITY TRUE;
 
 -- Put new data
 -- admin: 123
 -- trader: 123
 INSERT INTO `users` (`id`, `login`, `passwordHash`, `salt`, `personName`) VALUES
-	(1, 'admin', '85e25c1e193df1df5ada40fa52d3de6c713a242f', 'salt', 'Admin Adminov'),
-	(2, 'trader', '85e25c1e193df1df5ada40fa52d3de6c713a242f', 'salt', 'Trader Traderov');
+	(1, 'admin', '56de704185aefb35d7f7c41f84edb96bbc878f7d', 'salt', 'Admin Adminov'),
+	(2, 'trader', '56de704185aefb35d7f7c41f84edb96bbc878f7d', 'salt', 'Trader Traderov');
 
 -- admin (users: admin)
 --  recipes (view: traider)

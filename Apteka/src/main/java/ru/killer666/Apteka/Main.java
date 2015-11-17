@@ -117,7 +117,7 @@ public class Main extends Application {
 
             userAuthTask.setOnRunning((workerStateEvent) -> {
                 this.status.setFill(Color.FORESTGREEN);
-                this.status.setText("Logging in...");
+                this.status.setText("Выполняется вход...");
             });
 
             userAuthTask.setOnSucceeded((workerStateEvent) -> {
@@ -125,8 +125,9 @@ public class Main extends Application {
                     Exception authResult = userAuthTask.get();
 
                     if (authResult == null) {
-                        // TODO: Auth succeed
+                        this.status.setText("Привет, " + this.userController.getLogOnUser().getPersonName() + "!");
 
+                        // TODO: Auth succeed
                         return;
                     }
 
