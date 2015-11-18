@@ -13,6 +13,9 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import lombok.Getter;
+import lombok.Setter;
+import ru.killer666.Apteka.domains.Role;
 import ru.killer666.trpo.aaa.UserController;
 import ru.killer666.trpo.aaa.domains.Resource;
 
@@ -113,6 +116,9 @@ class Workspace {
 
                 ResourceWorkspaceInterface workspaceInterface;
 
+                // TODO: Auth with role
+                //this.userController.authResource(resource.getName());
+
                 try {
                     workspaceInterface = this.resourceClassMap.get(resource).newInstance();
                 } catch (InstantiationException | IllegalAccessException e1) {
@@ -141,6 +147,21 @@ class Workspace {
         Pane getPane() {
             BorderPane borderPane = new BorderPane();
             borderPane.setCenter(new Label("Ресурс \"" + this.getResource().getName() + "\" не имеет обработчика"));
+
+            return borderPane;
+        }
+    }
+
+    static class AccessDeniedWorkspace extends ResourceWorkspaceInterface {
+
+        @Getter
+        @Setter
+        private Role role;
+
+        @Override
+        Pane getPane() {
+            BorderPane borderPane = new BorderPane();
+            borderPane.setCenter(new Label("Доступ запрещён в \"" + this.getResource().getName() + "\" с ролью " + this.getRole().name() + "!"));
 
             return borderPane;
         }
