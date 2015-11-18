@@ -95,6 +95,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+
         primaryStage.setTitle("Аптека \"Рашнаптек груп\"");
 
         GridPane grid = new GridPane();
@@ -125,9 +126,9 @@ public class Main extends Application {
                     Exception authResult = userAuthTask.get();
 
                     if (authResult == null) {
-                        this.status.setText("Привет, " + this.userController.getLogOnUser().getPersonName() + "!");
+                        primaryStage.close();
 
-                        // TODO: Auth succeed
+                        new Workspace(primaryStage, this.userController).init();
                         return;
                     }
 
@@ -150,7 +151,6 @@ public class Main extends Application {
 
         Scene scene = new Scene(grid, 550, 500);
         primaryStage.setScene(scene);
-
         primaryStage.show();
     }
 
