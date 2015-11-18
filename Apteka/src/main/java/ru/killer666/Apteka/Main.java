@@ -126,6 +126,7 @@ public class Main extends Application {
                     Exception authResult = userAuthTask.get();
 
                     if (authResult == null) {
+                        this.status.setText("");
                         primaryStage.close();
 
                         new Workspace(primaryStage, this.userController).init();
