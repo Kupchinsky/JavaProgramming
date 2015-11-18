@@ -31,15 +31,29 @@ INSERT INTO `resources` (`id`, `name`, `parent_resource_id`) VALUES
 	(6, 'trader/sell', 5),
 	(7, 'trader/create_recipe', 5);
 
-INSERT INTO `resources_users` (`id`, `resource_id`, `user_id`, `role`) VALUES
+INSERT INTO `resources_users` (`resource_id`, `user_id`, `role`) VALUES
 	-- user: admin, resource: admin, role: CEO
-	(1, 1, 1, 1),
+	(1, 1, 1),
+	(2, 1, 1),
+	(3, 1, 1),
+	(4, 1, 1),
+
+	-- user: admin, resource: trader, role: CEO
+	(5, 1, 1),
+	(6, 1, 1),
+	(7, 1, 1),
 
 	-- user: admin, resource: trader, role: TRADER
-	(2, 5, 1, 2),
+	(5, 1, 2),
+	(6, 1, 2),
+	(7, 1, 2),
 
 	-- user: trader, resource: admin, role: TRADER
-	(3, 1, 2, 2),
+	(1, 2, 2),
+	(2, 2, 2),
+	(4, 2, 2),
 
 	-- user: trader, resource: trader, role: TRADER
-	(4, 5, 2, 2);
+	(5, 2, 2),
+	(6, 2, 2),
+	(7, 2, 2);

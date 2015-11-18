@@ -4,10 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -18,18 +15,20 @@ import lombok.Setter;
 import ru.killer666.Apteka.domains.Role;
 import ru.killer666.trpo.aaa.UserController;
 import ru.killer666.trpo.aaa.domains.Resource;
+import ru.killer666.trpo.aaa.exceptions.ResourceDeniedException;
+import ru.killer666.trpo.aaa.exceptions.ResourceNotFoundException;
 
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 class Workspace {
 
-    static {
-        //Workspace.workspaceClassMap.put("admin", EmptyWorkspace.class);
-    }
-
     private static Map<String, Class<? extends ResourceWorkspaceInterface>> workspaceClassMap = new HashMap<>();
+
+    static {
+        Workspace.workspaceClassMap.put("admin", SelectSubInterfaceWorkspace.class);
+        Workspace.workspaceClassMap.put("trader", SelectSubInterfaceWorkspace.class);
+    }
 
     private ImmutableMap<Resource, Class<? extends ResourceWorkspaceInterface>> resourceClassMap;
 
@@ -45,7 +44,10 @@ class Workspace {
         Map<Resource, Class<? extends ResourceWorkspaceInterface>> resourceClassMap = new HashMap<>();
 
         try {
-            for (Resource resource : userController.getAllResources()) {
+            List<Resource> resourceList = userController.getAllResources();
+            Collections.sort(resourceList);
+
+            for (Resource resource : resourceList) {
                 Class<? extends ResourceWorkspaceInterface> resourceClass = Workspace.workspaceClassMap.get(resource.getName());
 
                 if (resourceClass == null) {
@@ -82,7 +84,11 @@ class Workspace {
 
             if (alert.showAndWait().get() == ButtonType.OK) {
 
-                // TODO: Save accounting
+                try {
+                    this.userController.saveAccounting();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
 
                 this.userController.clearAll();
 
@@ -109,21 +115,79 @@ class Workspace {
         infoLabel2.setStyle("-fx-text-fill: white;");
         resourcesPane.add(infoLabel2, 0, rowIndex++);
 
+        Label infoLabelRole = new Label("");
+        infoLabelRole.setStyle("-fx-text-fill: white;");
+        resourcesPane.add(infoLabelRole, 0, rowIndex++);
+
         for (Resource resource : this.resourceClassMap.keySet()) {
             Button buttonResource = new Button(resource.getName());
 
             buttonResource.setOnAction((e) -> {
 
                 ResourceWorkspaceInterface workspaceInterface;
-
-                // TODO: Auth with role
-                //this.userController.authResource(resource.getName());
+                Role role = null;
 
                 try {
+                    List<Integer> roles = this.userController.getGrantedRoles(resource);
+
+                    if (roles.size() == 0) {
+                        throw new RolesNotFoundException();
+                    }
+
+                    if (roles.size() > 1) {
+                        List<String> choices = new ArrayList<>();
+
+                        for (Integer intRole : roles) {
+
+                            for (Role _role : Role.values()) {
+                                if (_role.getValue() == intRole) {
+                                    choices.add(_role.name());
+                                    break;
+                                }
+                            }
+                        }
+
+                        ChoiceDialog<String> dialog = new ChoiceDialog<>(choices.iterator().next(), choices);
+
+                        dialog.setTitle(this.stage.getTitle());
+                        dialog.setHeaderText("Выбор роли для доступа");
+                        dialog.setContentText("Выберите роль:");
+
+                        Optional<String> result = dialog.showAndWait();
+
+                        if (!result.isPresent()) {
+                            return;
+                        }
+
+                        role = Role.valueOf(result.get());
+                    } else {
+                        int intRole = roles.iterator().next();
+
+                        for (Role _role : Role.values()) {
+                            if (_role.getValue() == intRole) {
+                                role = _role;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (role == null) {
+                        return;
+                    }
+
+                    this.userController.authResource(resource, role);
                     workspaceInterface = this.resourceClassMap.get(resource).newInstance();
-                } catch (InstantiationException | IllegalAccessException e1) {
+                    buttonResource.setStyle("-fx-background-color: green;");
+
+                    infoLabelRole.setText("Роль: " + role.name());
+                } catch (SQLException | InstantiationException | IllegalAccessException | ResourceNotFoundException e1) {
                     e1.printStackTrace();
                     return;
+                } catch (RolesNotFoundException | ResourceDeniedException e1) {
+                    workspaceInterface = new AccessDeniedWorkspace();
+                    ((AccessDeniedWorkspace) workspaceInterface).setRole(role);
+                    buttonResource.setStyle("-fx-background-color: red; -fx-text-fill: white;");
+                    infoLabelRole.setText("");
                 }
 
                 workspaceInterface.setResource(resource);
@@ -156,14 +220,29 @@ class Workspace {
 
         @Getter
         @Setter
-        private Role role;
+        private Role role = null;
 
         @Override
         Pane getPane() {
             BorderPane borderPane = new BorderPane();
-            borderPane.setCenter(new Label("Доступ запрещён в \"" + this.getResource().getName() + "\" с ролью " + this.getRole().name() + "!"));
+            borderPane.setCenter(new Label("Доступ запрещён в \"" + this.getResource().getName() + "\"" + (this.role != null ? " с ролью " + this.role.name() + "!" : "")));
 
             return borderPane;
         }
+    }
+
+    static class SelectSubInterfaceWorkspace extends ResourceWorkspaceInterface {
+
+        @Override
+        Pane getPane() {
+            BorderPane borderPane = new BorderPane();
+            borderPane.setCenter(new Label("Выберите дочерний ресурс!"));
+
+            return borderPane;
+        }
+    }
+
+    static class RolesNotFoundException extends Exception {
+
     }
 }
