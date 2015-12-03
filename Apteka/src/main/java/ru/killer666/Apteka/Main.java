@@ -37,7 +37,7 @@ public class Main extends Application {
     private final AuthService authService;
 
     {
-        HibernateService hibernateService = new HibernateService("url", "user", "pw", "dialect");
+        HibernateService hibernateService = new HibernateService("jdbc:oracle:thin:@82.179.3.84:1521:mics", "stud08", "stud08", "org.hibernate.dialect.Oracle8iDialect");
         this.authService = new AuthService(hibernateService, Role.class);
     }
 
