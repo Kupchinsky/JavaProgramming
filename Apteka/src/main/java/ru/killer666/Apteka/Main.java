@@ -20,9 +20,11 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import lombok.AllArgsConstructor;
-import ru.killer666.trpo.aaa.UserController;
+import ru.killer666.Apteka.domains.Role;
 import ru.killer666.trpo.aaa.exceptions.IncorrectPasswordException;
 import ru.killer666.trpo.aaa.exceptions.UserNotFoundException;
+import ru.killer666.trpo.aaa.services.AuthService;
+import ru.killer666.trpo.aaa.services.HibernateService;
 
 import java.util.concurrent.ExecutionException;
 
@@ -32,7 +34,12 @@ public class Main extends Application {
     private final PasswordField passwordField = new PasswordField();
     private final Text status = new Text();
     private final Button authButton = new Button("Войти");
-    private final UserController userController = new UserController();
+    private final AuthService authService;
+
+    {
+        HibernateService hibernateService = new HibernateService("url", "user", "pw", "dialect");
+        this.authService = new AuthService(hibernateService, Role.class);
+    }
 
     @AllArgsConstructor
     private final class UserAuthTask extends Task<Exception> {
@@ -49,7 +56,7 @@ public class Main extends Application {
             }
 
             try {
-                Main.this.userController.authUser(this.userName, this.password);
+                Main.this.authService.authUser(this.userName, this.password);
             } catch (Exception e) {
                 return e;
             }
@@ -129,7 +136,7 @@ public class Main extends Application {
                         this.status.setText("");
                         primaryStage.close();
 
-                        new Workspace(primaryStage, this.userController).init();
+                        new Workspace(primaryStage, this.authService).init();
                         return;
                     }
 

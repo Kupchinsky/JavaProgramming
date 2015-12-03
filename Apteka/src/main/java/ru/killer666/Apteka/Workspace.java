@@ -13,11 +13,13 @@ import javafx.stage.Stage;
 import lombok.Getter;
 import lombok.Setter;
 import ru.killer666.Apteka.domains.Role;
-import ru.killer666.trpo.aaa.UserController;
+import ru.killer666.trpo.aaa.RoleInterface;
 import ru.killer666.trpo.aaa.domains.Resource;
 import ru.killer666.trpo.aaa.exceptions.ResourceDeniedException;
 import ru.killer666.trpo.aaa.exceptions.ResourceNotFoundException;
+import ru.killer666.trpo.aaa.services.AuthService;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -34,34 +36,30 @@ class Workspace {
 
     private final Stage stage;
     private final Scene previousScene;
-    private final UserController userController;
+    private final AuthService authService;
 
-    Workspace(Stage stage, UserController userController) {
+    Workspace(Stage stage, AuthService authService) {
         this.stage = stage;
         this.previousScene = stage.getScene();
-        this.userController = userController;
+        this.authService = authService;
 
         Map<Resource, Class<? extends ResourceWorkspaceInterface>> resourceClassMap = new HashMap<>();
 
-        try {
-            List<Resource> resourceList = userController.getAllResources();
-            Collections.sort(resourceList);
+        List<Resource> resourceList = authService.getAllResources();
+        Collections.sort(resourceList);
 
-            for (Resource resource : resourceList) {
-                Class<? extends ResourceWorkspaceInterface> resourceClass = Workspace.workspaceClassMap.get(resource.getName());
+        for (Resource resource : resourceList) {
+            Class<? extends ResourceWorkspaceInterface> resourceClass = Workspace.workspaceClassMap.get(resource.getName());
 
-                if (resourceClass == null) {
-                    resourceClass = EmptyWorkspace.class;
-                }
-
-                resourceClassMap.put(resource, resourceClass);
+            if (resourceClass == null) {
+                resourceClass = EmptyWorkspace.class;
             }
 
-            this.resourceClassMap = new ImmutableMap.Builder<Resource, Class<? extends ResourceWorkspaceInterface>>()
-                    .putAll(resourceClassMap).build();
-        } catch (SQLException e1) {
-            e1.printStackTrace();
+            resourceClassMap.put(resource, resourceClass);
         }
+
+        this.resourceClassMap = new ImmutableMap.Builder<Resource, Class<? extends ResourceWorkspaceInterface>>()
+                .putAll(resourceClassMap).build();
     }
 
     void init() {
@@ -72,7 +70,7 @@ class Workspace {
         authBox.setAlignment(Pos.CENTER);
         authBox.setPadding(new Insets(10, 0, 10, 0));
         authBox.setStyle("-fx-background-color: #C5B0B0;");
-        authBox.getChildren().add(new Label("Добро пожаловать, " + this.userController.getLogOnUser().getPersonName() + "!"));
+        authBox.getChildren().add(new Label("Добро пожаловать, " + this.authService.getLogOnUser().getPersonName() + "!"));
 
         Button logoutButton = new Button("Выход");
 
@@ -85,12 +83,12 @@ class Workspace {
             if (alert.showAndWait().get() == ButtonType.OK) {
 
                 try {
-                    this.userController.saveAccounting();
+                    this.authService.saveAccounting();
                 } catch (SQLException e1) {
                     e1.printStackTrace();
                 }
 
-                this.userController.clearAll();
+                this.authService.clearAll();
 
                 this.stage.close();
                 this.stage.setScene(this.previousScene);
@@ -128,7 +126,7 @@ class Workspace {
                 Role role = null;
 
                 try {
-                    List<Integer> roles = this.userController.getGrantedRoles(resource);
+                    List<RoleInterface> roles = this.authService.getGrantedRoles(resource);
 
                     if (roles.size() == 0) {
                         throw new RolesNotFoundException();
@@ -137,14 +135,8 @@ class Workspace {
                     if (roles.size() > 1) {
                         List<String> choices = new ArrayList<>();
 
-                        for (Integer intRole : roles) {
-
-                            for (Role _role : Role.values()) {
-                                if (_role.getValue() == intRole) {
-                                    choices.add(_role.name());
-                                    break;
-                                }
-                            }
+                        for (RoleInterface _role : roles) {
+                            choices.add(_role.name());
                         }
 
                         ChoiceDialog<String> dialog = new ChoiceDialog<>(choices.iterator().next(), choices);
@@ -161,26 +153,19 @@ class Workspace {
 
                         role = Role.valueOf(result.get());
                     } else {
-                        int intRole = roles.iterator().next();
-
-                        for (Role _role : Role.values()) {
-                            if (_role.getValue() == intRole) {
-                                role = _role;
-                                break;
-                            }
-                        }
+                        role = (Role) roles.iterator().next();
                     }
 
                     if (role == null) {
                         return;
                     }
 
-                    this.userController.authResource(resource, role);
+                    this.authService.authResource(resource, role);
                     workspaceInterface = this.resourceClassMap.get(resource).newInstance();
                     buttonResource.setStyle("-fx-background-color: green;");
 
                     infoLabelRole.setText("Роль: " + role.name());
-                } catch (SQLException | InstantiationException | IllegalAccessException | ResourceNotFoundException e1) {
+                } catch (SQLException | InstantiationException | IllegalAccessException | ResourceNotFoundException | InvocationTargetException | NoSuchMethodException e1) {
                     e1.printStackTrace();
                     return;
                 } catch (RolesNotFoundException | ResourceDeniedException e1) {

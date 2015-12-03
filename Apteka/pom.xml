@@ -96,11 +96,9 @@
             <version>19.0-rc2</version>
         </dependency>
 		<dependency>
-			<groupId>ru.killer666.trpo.AAA</groupId>
-			<artifactId>AAA</artifactId>
-			<version>1.0-SNAPSHOT</version>
-			<scope>system</scope>
-			<systemPath>${pom.basedir}\aaa-dependency.jar</systemPath>
+			<groupId>ru.killer666.aaa</groupId>
+			<artifactId>core</artifactId>
+			<version>5.0</version>
 		</dependency>
 	</dependencies>
 </project>

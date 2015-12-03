@@ -2,7 +2,7 @@ package ru.killer666.Apteka.domains;
 
 import lombok.Getter;
 import lombok.ToString;
-import ru.killer666.trpo.aaa.domains.RoleInterface;
+import ru.killer666.trpo.aaa.RoleInterface;
 
 @ToString
 public enum Role implements RoleInterface {
