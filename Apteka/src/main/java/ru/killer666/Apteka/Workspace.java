@@ -12,6 +12,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.Session;
 import ru.killer666.Apteka.domains.Role;
 import ru.killer666.trpo.aaa.RoleInterface;
 import ru.killer666.trpo.aaa.domains.Resource;
@@ -37,15 +38,17 @@ class Workspace {
     private final Stage stage;
     private final Scene previousScene;
     private final AuthService authService;
+    private final Session session;
 
-    Workspace(Stage stage, AuthService authService) {
+    Workspace(Stage stage, AuthService authService, Session session) {
         this.stage = stage;
         this.previousScene = stage.getScene();
         this.authService = authService;
+        this.session = session;
 
         Map<Resource, Class<? extends ResourceWorkspaceInterface>> resourceClassMap = new HashMap<>();
 
-        List<Resource> resourceList = authService.getAllResources();
+        List<Resource> resourceList = authService.getAllResources(this.session);
         Collections.sort(resourceList);
 
         for (Resource resource : resourceList) {
@@ -83,7 +86,7 @@ class Workspace {
             if (alert.showAndWait().get() == ButtonType.OK) {
 
                 try {
-                    this.authService.saveAccounting();
+                    this.authService.saveAccounting(this.session);
                 } catch (SQLException e1) {
                     e1.printStackTrace();
                 }
@@ -126,7 +129,7 @@ class Workspace {
                 Role role = null;
 
                 try {
-                    List<RoleInterface> roles = this.authService.getGrantedRoles(resource);
+                    List<RoleInterface> roles = this.authService.getGrantedRoles(this.session, resource);
 
                     if (roles.size() == 0) {
                         throw new RolesNotFoundException();
@@ -160,12 +163,12 @@ class Workspace {
                         return;
                     }
 
-                    this.authService.authResource(resource, role);
+                    this.authService.authResource(this.session, resource, role);
                     workspaceInterface = this.resourceClassMap.get(resource).newInstance();
                     buttonResource.setStyle("-fx-background-color: green;");
 
                     infoLabelRole.setText("Роль: " + role.name());
-                } catch (SQLException | InstantiationException | IllegalAccessException | ResourceNotFoundException | InvocationTargetException | NoSuchMethodException e1) {
+                } catch (InstantiationException | IllegalAccessException | ResourceNotFoundException | InvocationTargetException | NoSuchMethodException e1) {
                     e1.printStackTrace();
                     return;
                 } catch (RolesNotFoundException | ResourceDeniedException e1) {

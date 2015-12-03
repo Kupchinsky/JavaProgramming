@@ -20,6 +20,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import lombok.AllArgsConstructor;
+import org.hibernate.Session;
 import ru.killer666.Apteka.domains.Role;
 import ru.killer666.trpo.aaa.exceptions.IncorrectPasswordException;
 import ru.killer666.trpo.aaa.exceptions.UserNotFoundException;
@@ -35,10 +36,17 @@ public class Main extends Application {
     private final Text status = new Text();
     private final Button authButton = new Button("Войти");
     private final AuthService authService;
+    private final Session session;
 
     {
+        try {
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+        } catch (ClassNotFoundException e) {
+        }
+
         HibernateService hibernateService = new HibernateService("jdbc:oracle:thin:@82.179.3.84:1521:mics", "stud08", "stud08", "org.hibernate.dialect.Oracle8iDialect");
         this.authService = new AuthService(hibernateService, Role.class);
+        this.session = hibernateService.getSession();
     }
 
     @AllArgsConstructor
@@ -56,7 +64,7 @@ public class Main extends Application {
             }
 
             try {
-                Main.this.authService.authUser(this.userName, this.password);
+                Main.this.authService.authUser(Main.this.session, this.userName, this.password);
             } catch (Exception e) {
                 return e;
             }
@@ -136,7 +144,7 @@ public class Main extends Application {
                         this.status.setText("");
                         primaryStage.close();
 
-                        new Workspace(primaryStage, this.authService).init();
+                        new Workspace(primaryStage, this.authService, this.session).init();
                         return;
                     }
 
@@ -160,6 +168,10 @@ public class Main extends Application {
         Scene scene = new Scene(grid, 550, 500);
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+    private Session getSession() {
+        return this.session != null ? this.session : this.authService.getHibernateService().getSession();
     }
 
     public static void main(String[] args) {
