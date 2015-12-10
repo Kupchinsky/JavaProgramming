@@ -9,6 +9,9 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Transaction;
@@ -24,9 +27,16 @@ public class AdminRecipes extends ResourceWorkspaceInterface {
     @Override
     public Pane getPane() {
         BorderPane borderPane = new BorderPane();
+
+        Text textInfo = new Text("Управление рецептами");
+        textInfo.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+
+        borderPane.setTop(textInfo);
+
         TableView table = new TableView();
         table.setPlaceholder(new Label("Рецепты отсутствуют. Их может добавить продавец"));
         table.setEditable(true);
+        table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         this.addColumn(table, "firstName", "Фамилия");
         this.addColumn(table, "lastName", "Имя");

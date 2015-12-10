@@ -112,6 +112,11 @@ public class TraderCreateRecipe extends ResourceWorkspaceInterface {
             fieldDiagnosis.clear();
             fieldAddress.clear();
             fieldPhone.clear();
+
+            alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText("Сообщение");
+            alert.setContentText("Рецепт успешно создан!");
+            alert.showAndWait();
         });
 
         FlowPane pane = new FlowPane();
