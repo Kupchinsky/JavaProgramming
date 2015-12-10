@@ -18,6 +18,7 @@ import ru.killer666.Apteka.ResourceWorkspaceInterface;
 import ru.killer666.Apteka.domains.Drug;
 import ru.killer666.Apteka.domains.Order;
 import ru.killer666.Apteka.domains.Recipe;
+import ru.killer666.Apteka.domains.Role;
 
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
@@ -54,37 +55,40 @@ public class AdminSells extends ResourceWorkspaceInterface {
         table.setItems(data);
         borderPane.setCenter(table);
 
-        Button deleteButton = new Button("Удалить");
-        deleteButton.setOnAction(event -> {
-            ObservableList<Order> selectedItems = table.getSelectionModel().getSelectedItems();
+        if (this.getRole() == Role.ADMIN) {
+            Button deleteButton = new Button("Удалить");
+            deleteButton.setOnAction(event -> {
+                ObservableList<Order> selectedItems = table.getSelectionModel().getSelectedItems();
 
-            if (selectedItems.size() == 0) {
-                return;
-            }
+                if (selectedItems.size() == 0) {
+                    return;
+                }
 
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setHeaderText("Подтверждение удаления");
-            alert.setContentText("Вы уверены?");
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setHeaderText("Подтверждение удаления");
+                alert.setContentText("Вы уверены?");
 
-            if (alert.showAndWait().get() == ButtonType.CANCEL) {
-                return;
-            }
+                if (alert.showAndWait().get() == ButtonType.CANCEL) {
+                    return;
+                }
 
-            Transaction tx = this.getSession().beginTransaction();
+                Transaction tx = this.getSession().beginTransaction();
 
-            for (Order order : selectedItems) {
-                this.getSession().delete(order);
-                data.remove(order);
-            }
+                for (Order order : selectedItems) {
+                    this.getSession().delete(order);
+                    data.remove(order);
+                }
 
-            tx.commit();
-        });
+                tx.commit();
+            });
 
-        FlowPane pane = new FlowPane();
-        pane.setPadding(new Insets(15, 15, 15, 15));
-        pane.getChildren().add(deleteButton);
+            FlowPane pane = new FlowPane();
+            pane.setPadding(new Insets(15, 15, 15, 15));
+            pane.getChildren().add(deleteButton);
 
-        borderPane.setBottom(pane);
+            borderPane.setBottom(pane);
+        }
+
         return borderPane;
     }
 

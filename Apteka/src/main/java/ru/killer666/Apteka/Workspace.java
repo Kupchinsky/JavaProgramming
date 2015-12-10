@@ -10,9 +10,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 import org.hibernate.Session;
 import ru.killer666.Apteka.domains.Role;
 import ru.killer666.Apteka.workspaces.*;
@@ -91,13 +89,6 @@ class Workspace {
             alert.setContentText("Вы уверены?");
 
             if (alert.showAndWait().get() == ButtonType.OK) {
-
-                /*try {
-                    this.authService.saveAccounting(this.session);
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }*/
-
                 this.authService.clearAll();
 
                 this.stage.close();
@@ -180,12 +171,13 @@ class Workspace {
                     return;
                 } catch (RolesNotFoundException | ResourceDeniedException e1) {
                     workspaceInterface = new AccessDeniedWorkspace();
-                    ((AccessDeniedWorkspace) workspaceInterface).setRole(role);
+                    workspaceInterface.setRole(role);
                     buttonResource.setStyle("-fx-background-color: red; -fx-text-fill: white;");
                     infoLabelRole.setText("");
                 }
-
+                
                 workspaceInterface.setResource(resource);
+                workspaceInterface.setRole(role);
                 workspaceInterface.setSession(this.session);
 
                 borderPane.setCenter(workspaceInterface.getPane());
@@ -235,15 +227,10 @@ class Workspace {
     }
 
     static class AccessDeniedWorkspace extends ResourceWorkspaceInterface {
-
-        @Getter
-        @Setter
-        private Role role = null;
-
         @Override
         public Pane getPane() {
             BorderPane borderPane = new BorderPane();
-            borderPane.setCenter(new Label("Доступ запрещён в \"" + this.getResource().getName() + "\"" + (this.role != null ? " с ролью " + this.role.name() + "!" : "")));
+            borderPane.setCenter(new Label("Доступ запрещён в \"" + this.getResource().getName() + "\"" + (this.getRole() != null ? " с ролью " + this.getRole().name() + "!" : "")));
 
             return borderPane;
         }

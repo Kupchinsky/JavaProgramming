@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.Session;
+import ru.killer666.Apteka.domains.Role;
 import ru.killer666.trpo.aaa.domains.Resource;
 
 public abstract class ResourceWorkspaceInterface {
@@ -12,6 +13,10 @@ public abstract class ResourceWorkspaceInterface {
     @Getter(AccessLevel.PUBLIC)
     @Setter(AccessLevel.PUBLIC)
     private Resource resource;
+
+    @Getter(AccessLevel.PUBLIC)
+    @Setter(AccessLevel.PUBLIC)
+    private Role role;
 
     @Getter(AccessLevel.PUBLIC)
     @Setter(AccessLevel.PUBLIC)
