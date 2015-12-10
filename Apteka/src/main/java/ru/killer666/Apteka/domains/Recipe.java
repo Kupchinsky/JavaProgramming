@@ -35,4 +35,9 @@ public class Recipe {
 
     @Column(name = "phone", nullable = false)
     private String phone;
+
+    @Override
+    public String toString() {
+        return this.firstName + " " + this.lastName + " " + this.secondName + " (" + this.age + " лет, " + this.diagnosis + ")";
+    }
 }

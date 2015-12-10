@@ -1,6 +1,8 @@
 package ru.killer666.Apteka.workspaces;
 
 import com.google.common.base.Preconditions;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -11,12 +13,38 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import org.hibernate.Transaction;
+import lombok.NonNull;
 import ru.killer666.Apteka.ResourceWorkspaceInterface;
+import ru.killer666.Apteka.domains.Drug;
 import ru.killer666.Apteka.domains.Recipe;
 
 @SuppressWarnings("unchecked")
 public class TraderCreateOrder extends ResourceWorkspaceInterface {
+
+    private int calcPrice(@NonNull Drug drug, int quantity) {
+        return drug.getPrice() * quantity;
+    }
+
+    private void calcPriceAndCheckQuantity(@NonNull ComboBox<Drug> fieldDrug, TextField fieldQuantity, Text fieldPrice) {
+        Drug drug = fieldDrug.getSelectionModel().getSelectedItem();
+        int quantity = 0;
+
+        try {
+            if (fieldQuantity.getLength() != 0) {
+                quantity = Integer.parseInt(fieldQuantity.getText());
+
+                if (quantity < 0 || quantity > drug.getStorageQuantity()) {
+                    quantity = 0;
+                    fieldQuantity.setText("0");
+                }
+            }
+        } catch (IllegalArgumentException e) {
+            fieldPrice.setText("0");
+        }
+
+        fieldPrice.setText(String.valueOf(drug.getPrice() * quantity));
+    }
+
     @Override
     public Pane getPane() {
         BorderPane borderPane = new BorderPane();
@@ -27,52 +55,68 @@ public class TraderCreateOrder extends ResourceWorkspaceInterface {
         gridPane.setHgap(10);
         gridPane.setVgap(10);
 
-        Text textInfo = new Text("Добавление рецепта");
+        Text textInfo = new Text("Создание заказа");
         textInfo.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
 
         gridPane.add(textInfo, 0, 0);
 
-        gridPane.add(new Label("Фамилия:"), 0, 1);
-        gridPane.add(new Label("Имя:"), 0, 2);
-        gridPane.add(new Label("Отчество:"), 0, 3);
-        gridPane.add(new Label("Возраст:"), 0, 4);
-        gridPane.add(new Label("Диагноз:"), 0, 5);
-        gridPane.add(new Label("Адрес:"), 0, 6);
-        gridPane.add(new Label("Телефон:"), 0, 7);
+        gridPane.add(new Label("Лекарство:"), 0, 1);
+        gridPane.add(new Label("Рецепт:"), 0, 2);
+        gridPane.add(new Label("Количество:"), 0, 3);
+        gridPane.add(new Label("Итоговая цена:"), 0, 4);
 
-        TextField fieldFirstName = new TextField();
-        TextField fieldLastName = new TextField();
-        TextField fieldSecondName = new TextField();
-        TextField fieldAge = new TextField();
-        TextField fieldDiagnosis = new TextField();
-        TextField fieldAddress = new TextField();
-        TextField fieldPhone = new TextField();
+        ComboBox<Drug> fieldDrug = new ComboBox<>();
+        ComboBox<Recipe> fieldRecipe = new ComboBox<>();
+        CheckBox withoutRecipe = new CheckBox("Отпустить без рецепта");
+        TextField fieldQuantity = new TextField();
+        Text fieldPrice = new Text("0");
 
-        gridPane.add(fieldFirstName, 1, 1);
-        gridPane.add(fieldLastName, 1, 2);
-        gridPane.add(fieldSecondName, 1, 3);
-        gridPane.add(fieldAge, 1, 4);
-        gridPane.add(fieldDiagnosis, 1, 5);
-        gridPane.add(fieldAddress, 1, 6);
-        gridPane.add(fieldPhone, 1, 7);
+        fieldDrug.setOnAction(event -> this.calcPriceAndCheckQuantity(fieldDrug, fieldQuantity, fieldPrice));
+        fieldQuantity.textProperty().addListener((observable, oldValue, newValue) -> this.calcPriceAndCheckQuantity(fieldDrug, fieldQuantity, fieldPrice));
+        withoutRecipe.setOnAction(event -> fieldRecipe.setDisable(withoutRecipe.isSelected()));
+
+        ObservableList<Drug> drugs = FXCollections.observableArrayList();
+        drugs.addAll(this.getSession().createCriteria(Drug.class).list());
+
+        fieldDrug.setItems(drugs);
+
+        if (drugs.size() != 0) {
+            fieldDrug.getSelectionModel().select(0);
+        }
+
+        ObservableList<Recipe> recipes = FXCollections.observableArrayList();
+        recipes.addAll(this.getSession().createCriteria(Recipe.class).list());
+
+        fieldRecipe.setItems(recipes);
+
+        if (recipes.size() != 0) {
+            fieldRecipe.getSelectionModel().select(0);
+        }
+
+        GridPane gridPane2 = new GridPane();
+        gridPane2.setHgap(10);
+        gridPane2.setVgap(10);
+
+        gridPane2.add(fieldRecipe, 0, 0);
+        gridPane2.add(withoutRecipe, 0, 1);
+
+        gridPane.add(fieldDrug, 1, 1);
+        gridPane.add(gridPane2, 1, 2);
+        gridPane.add(fieldQuantity, 1, 3);
+        gridPane.add(fieldPrice, 1, 4);
 
         borderPane.setCenter(gridPane);
 
-        Button deleteButton = new Button("Добавить");
-        deleteButton.setOnAction(event -> {
-
-            int age;
+        Button createButton = new Button("Создать");
+        createButton.setOnAction(event -> {
+            Drug drug = fieldDrug.getSelectionModel().getSelectedItem();
+            int quantity;
 
             try {
-                Preconditions.checkArgument(fieldFirstName.getLength() != 0, "Заполните фамилию");
-                Preconditions.checkArgument(fieldLastName.getLength() != 0, "Заполните имя");
-                Preconditions.checkArgument(fieldSecondName.getLength() != 0, "Заполните отчество");
-                Preconditions.checkArgument(fieldAge.getLength() != 0, "Заполните возраст");
-                Preconditions.checkArgument(fieldDiagnosis.getLength() != 0, "Заполните диагноз");
-                Preconditions.checkArgument(fieldAddress.getLength() != 0, "Заполните адрес");
-                Preconditions.checkArgument(fieldPhone.getLength() != 0, "Заполните телефон");
+                Preconditions.checkArgument(fieldQuantity.getLength() != 0, "Заполните количество");
+                quantity = Integer.parseInt(fieldQuantity.getText());
 
-                age = Integer.parseInt(fieldAge.getText());
+                Preconditions.checkArgument(drug.getStorageQuantity() >= quantity, "Недопустимое количество! Осталось: " + drug.getStorageQuantity() + " единиц товара");
             } catch (IllegalArgumentException e) {
 
                 Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -82,46 +126,11 @@ public class TraderCreateOrder extends ResourceWorkspaceInterface {
 
                 return;
             }
-
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setHeaderText("Подтверждение добавления");
-            alert.setContentText("Вы уверены?");
-
-            if (alert.showAndWait().get() == ButtonType.CANCEL) {
-                return;
-            }
-
-            Transaction tx = this.getSession().beginTransaction();
-
-            Recipe recipe = new Recipe();
-            recipe.setFirstName(fieldFirstName.getText());
-            recipe.setLastName(fieldLastName.getText());
-            recipe.setSecondName(fieldSecondName.getText());
-            recipe.setDiagnosis(fieldDiagnosis.getText());
-            recipe.setAddress(fieldAddress.getText());
-            recipe.setPhone(fieldPhone.getText());
-            recipe.setAge(age);
-
-            this.getSession().save(recipe);
-            tx.commit();
-
-            fieldFirstName.clear();
-            fieldLastName.clear();
-            fieldSecondName.clear();
-            fieldAge.clear();
-            fieldDiagnosis.clear();
-            fieldAddress.clear();
-            fieldPhone.clear();
-
-            alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setHeaderText("Сообщение");
-            alert.setContentText("Рецепт успешно создан!");
-            alert.show();
         });
 
         FlowPane pane = new FlowPane();
         pane.setPadding(new Insets(15, 15, 15, 15));
-        pane.getChildren().add(deleteButton);
+        pane.getChildren().add(createButton);
 
         borderPane.setBottom(pane);
         return borderPane;

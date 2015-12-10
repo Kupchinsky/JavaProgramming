@@ -1,12 +1,10 @@
 package ru.killer666.Apteka.domains;
 
 import lombok.Data;
-import lombok.ToString;
 
 import javax.persistence.*;
 
 @Data
-@ToString
 @Entity
 @Table(name = "drugs")
 public class Drug {
@@ -29,4 +27,9 @@ public class Drug {
 
     @Column(name = "storage_quantity", nullable = false)
     private int storageQuantity;
+
+    @Override
+    public String toString() {
+        return this.name + " (" + this.storageQuantity + " единиц на складе)";
+    }
 }
