@@ -15,6 +15,7 @@ import lombok.NonNull;
 import lombok.Setter;
 import org.hibernate.Session;
 import ru.killer666.Apteka.domains.Role;
+import ru.killer666.Apteka.workspaces.AdminDrugs;
 import ru.killer666.Apteka.workspaces.AdminRecipes;
 import ru.killer666.Apteka.workspaces.TraderCreateRecipe;
 import ru.killer666.trpo.aaa.RoleInterface;
@@ -34,6 +35,8 @@ class Workspace {
     static {
         Workspace.workspaceClassMap.put("admin", SelectSubInterfaceWorkspace.class);
         Workspace.workspaceClassMap.put("admin/recipes", AdminRecipes.class);
+        Workspace.workspaceClassMap.put("admin/products", AdminDrugs.class);
+
         Workspace.workspaceClassMap.put("trader", SelectSubInterfaceWorkspace.class);
         Workspace.workspaceClassMap.put("trader/create_recipe", TraderCreateRecipe.class);
     }

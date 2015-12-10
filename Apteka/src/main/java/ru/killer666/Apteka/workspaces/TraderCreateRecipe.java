@@ -116,7 +116,7 @@ public class TraderCreateRecipe extends ResourceWorkspaceInterface {
             alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setHeaderText("Сообщение");
             alert.setContentText("Рецепт успешно создан!");
-            alert.showAndWait();
+            alert.show();
         });
 
         FlowPane pane = new FlowPane();
