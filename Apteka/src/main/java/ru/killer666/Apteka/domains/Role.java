@@ -6,12 +6,12 @@ import ru.killer666.trpo.aaa.RoleInterface;
 
 @ToString
 public enum Role implements RoleInterface {
-    CEO(1), TRADER(2);
+    ADMIN("Администратор"), TRADER("Продавец");
 
     @Getter
-    private final int value;
+    private final String value;
 
-    Role(int value) {
+    Role(String value) {
         this.value = value;
     }
 }

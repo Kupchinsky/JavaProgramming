@@ -144,25 +144,25 @@ class Workspace {
                     }
 
                     if (roles.size() > 1) {
-                        List<String> choices = new ArrayList<>();
+                        List<Role> choices = new ArrayList<>();
 
                         for (RoleInterface _role : roles) {
-                            choices.add(_role.name());
+                            choices.add(Role.values()[_role.ordinal()]);
                         }
 
-                        ChoiceDialog<String> dialog = new ChoiceDialog<>(choices.iterator().next(), choices);
+                        ChoiceDialog<Role> dialog = new ChoiceDialog<>(choices.iterator().next(), choices);
 
                         dialog.setTitle(this.stage.getTitle());
                         dialog.setHeaderText("Выбор роли для доступа");
                         dialog.setContentText("Выберите роль:");
 
-                        Optional<String> result = dialog.showAndWait();
+                        Optional<Role> result = dialog.showAndWait();
 
                         if (!result.isPresent()) {
                             return;
                         }
 
-                        role = Role.valueOf(result.get());
+                        role = result.get();
                     } else {
                         role = (Role) roles.iterator().next();
                     }
