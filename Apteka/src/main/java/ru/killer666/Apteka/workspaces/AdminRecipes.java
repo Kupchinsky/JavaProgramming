@@ -25,6 +25,7 @@ public class AdminRecipes extends ResourceWorkspaceInterface {
     public Pane getPane() {
         BorderPane borderPane = new BorderPane();
         TableView table = new TableView();
+        table.setPlaceholder(new Label("Рецепты отсутствуют. Их может добавить продавец"));
         table.setEditable(true);
 
         this.addColumn(table, "firstName", "Фамилия");
@@ -39,7 +40,6 @@ public class AdminRecipes extends ResourceWorkspaceInterface {
         data.addAll(this.getSession().createCriteria(Recipe.class).list());
 
         table.setItems(data);
-
         borderPane.setCenter(table);
 
         Button deleteButton = new Button("Удалить");
@@ -120,6 +120,7 @@ public class AdminRecipes extends ResourceWorkspaceInterface {
 
             return new SimpleStringProperty("Exception");
         });
+
         view.getColumns().add(tableColumn);
     }
 }

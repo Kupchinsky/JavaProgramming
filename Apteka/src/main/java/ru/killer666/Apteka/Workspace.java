@@ -11,10 +11,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import org.hibernate.Session;
 import ru.killer666.Apteka.domains.Role;
 import ru.killer666.Apteka.workspaces.AdminRecipes;
+import ru.killer666.Apteka.workspaces.TraderCreateRecipe;
 import ru.killer666.trpo.aaa.RoleInterface;
 import ru.killer666.trpo.aaa.domains.Resource;
 import ru.killer666.trpo.aaa.exceptions.ResourceDeniedException;
@@ -33,6 +35,7 @@ class Workspace {
         Workspace.workspaceClassMap.put("admin", SelectSubInterfaceWorkspace.class);
         Workspace.workspaceClassMap.put("admin/recipes", AdminRecipes.class);
         Workspace.workspaceClassMap.put("trader", SelectSubInterfaceWorkspace.class);
+        Workspace.workspaceClassMap.put("trader/create_recipe", TraderCreateRecipe.class);
     }
 
     private ImmutableMap<Resource, Class<? extends ResourceWorkspaceInterface>> resourceClassMap;
@@ -123,7 +126,7 @@ class Workspace {
         resourcesPane.add(infoLabelRole, 0, rowIndex++);
 
         for (Resource resource : this.resourceClassMap.keySet()) {
-            Button buttonResource = new Button(resource.getName());
+            Button buttonResource = new Button(this.resourceToName(resource));
 
             buttonResource.setOnAction((e) -> {
 
@@ -197,12 +200,33 @@ class Workspace {
         this.stage.show();
     }
 
+    private static String resourceToName(@NonNull Resource resource) {
+        switch (resource.getName()) {
+            case "admin":
+                return "Администрирование";
+            case "admin/recipes":
+                return "Администрирование - Рецепты";
+            case "admin/products":
+                return "Администрирование - Продукты";
+            case "admin/sells":
+                return "Администрирование - Продажи";
+            case "trader":
+                return "Продавец";
+            case "trader/sell":
+                return "Продавец - Создать заказ";
+            case "trader/create_recipe":
+                return "Продавец - Создать рецепт";
+            default:
+                return resource.getName();
+        }
+    }
+
     static class EmptyWorkspace extends ResourceWorkspaceInterface {
 
         @Override
         public Pane getPane() {
             BorderPane borderPane = new BorderPane();
-            borderPane.setCenter(new Label("Ресурс \"" + this.getResource().getName() + "\" не имеет обработчика"));
+            borderPane.setCenter(new Label("Ресурс " + resourceToName(this.getResource()) + " (" + this.getResource().getName() + ") не имеет обработчика"));
 
             return borderPane;
         }

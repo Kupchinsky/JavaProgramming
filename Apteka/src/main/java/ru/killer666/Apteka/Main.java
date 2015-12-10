@@ -71,12 +71,6 @@ public class Main extends Application {
 
         @Override
         public Exception call() {
-
-            try {
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-            }
-
             try {
                 Main.this.authService.authUser(Main.this.session, this.userName, this.password);
             } catch (Exception e) {
@@ -183,10 +177,6 @@ public class Main extends Application {
         Scene scene = new Scene(grid, 550, 500);
         primaryStage.setScene(scene);
         primaryStage.show();
-    }
-
-    private Session getSession() {
-        return this.session != null ? this.session : this.authService.getHibernateService().getSession();
     }
 
     public static void main(String[] args) {
