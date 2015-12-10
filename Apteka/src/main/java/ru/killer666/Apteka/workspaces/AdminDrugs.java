@@ -44,7 +44,6 @@ public class AdminDrugs extends ResourceWorkspaceInterface {
 
         this.addColumn(table, "name", "Наименование");
         this.addColumn(table, "type", "Тип лекарства");
-        this.addColumn(table, "secondName", "Отчество");
         this.addColumn(table, "applyType", "Способ применения");
         this.addColumn(table, "price", "Цена");
         this.addColumn(table, "storageQuantity", "Количество на складе");
@@ -108,15 +107,19 @@ public class AdminDrugs extends ResourceWorkspaceInterface {
             Transaction tx = this.getSession().beginTransaction();
             int saved = 0;
 
-            for (Drug drug : selectedItems) {
+            try {
+                for (Drug drug : selectedItems) {
 
-                if (!this.newItems.contains(drug)) {
-                    continue;
+                    if (!this.newItems.contains(drug)) {
+                        continue;
+                    }
+
+                    this.getSession().save(drug);
+                    this.newItems.remove(drug);
+                    saved++;
                 }
-
-                this.getSession().save(drug);
-                this.newItems.remove(drug);
-                saved++;
+            } catch (Exception e) {
+                logger.error(e);
             }
 
             tx.commit();

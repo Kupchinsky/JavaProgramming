@@ -15,9 +15,7 @@ import lombok.NonNull;
 import lombok.Setter;
 import org.hibernate.Session;
 import ru.killer666.Apteka.domains.Role;
-import ru.killer666.Apteka.workspaces.AdminDrugs;
-import ru.killer666.Apteka.workspaces.AdminRecipes;
-import ru.killer666.Apteka.workspaces.TraderCreateRecipe;
+import ru.killer666.Apteka.workspaces.*;
 import ru.killer666.trpo.aaa.RoleInterface;
 import ru.killer666.trpo.aaa.domains.Resource;
 import ru.killer666.trpo.aaa.exceptions.ResourceDeniedException;
@@ -36,9 +34,11 @@ class Workspace {
         Workspace.workspaceClassMap.put("admin", SelectSubInterfaceWorkspace.class);
         Workspace.workspaceClassMap.put("admin/recipes", AdminRecipes.class);
         Workspace.workspaceClassMap.put("admin/products", AdminDrugs.class);
+        Workspace.workspaceClassMap.put("admin/sells", AdminSells.class);
 
         Workspace.workspaceClassMap.put("trader", SelectSubInterfaceWorkspace.class);
         Workspace.workspaceClassMap.put("trader/create_recipe", TraderCreateRecipe.class);
+        Workspace.workspaceClassMap.put("trader/sell", TraderCreateOrder.class);
     }
 
     private ImmutableMap<Resource, Class<? extends ResourceWorkspaceInterface>> resourceClassMap;
@@ -129,7 +129,7 @@ class Workspace {
         resourcesPane.add(infoLabelRole, 0, rowIndex++);
 
         for (Resource resource : this.resourceClassMap.keySet()) {
-            Button buttonResource = new Button(this.resourceToName(resource));
+            Button buttonResource = new Button(resourceToName(resource));
 
             buttonResource.setOnAction((e) -> {
 
