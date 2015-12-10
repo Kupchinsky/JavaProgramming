@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.Session;
 import ru.killer666.Apteka.domains.Role;
+import ru.killer666.Apteka.workspaces.AdminRecipes;
 import ru.killer666.trpo.aaa.RoleInterface;
 import ru.killer666.trpo.aaa.domains.Resource;
 import ru.killer666.trpo.aaa.exceptions.ResourceDeniedException;
@@ -30,6 +31,7 @@ class Workspace {
 
     static {
         Workspace.workspaceClassMap.put("admin", SelectSubInterfaceWorkspace.class);
+        Workspace.workspaceClassMap.put("admin/recipes", AdminRecipes.class);
         Workspace.workspaceClassMap.put("trader", SelectSubInterfaceWorkspace.class);
     }
 
@@ -179,6 +181,8 @@ class Workspace {
                 }
 
                 workspaceInterface.setResource(resource);
+                workspaceInterface.setSession(this.session);
+
                 borderPane.setCenter(workspaceInterface.getPane());
             });
 
@@ -196,7 +200,7 @@ class Workspace {
     static class EmptyWorkspace extends ResourceWorkspaceInterface {
 
         @Override
-        Pane getPane() {
+        public Pane getPane() {
             BorderPane borderPane = new BorderPane();
             borderPane.setCenter(new Label("Ресурс \"" + this.getResource().getName() + "\" не имеет обработчика"));
 
@@ -211,7 +215,7 @@ class Workspace {
         private Role role = null;
 
         @Override
-        Pane getPane() {
+        public Pane getPane() {
             BorderPane borderPane = new BorderPane();
             borderPane.setCenter(new Label("Доступ запрещён в \"" + this.getResource().getName() + "\"" + (this.role != null ? " с ролью " + this.role.name() + "!" : "")));
 
@@ -222,7 +226,7 @@ class Workspace {
     static class SelectSubInterfaceWorkspace extends ResourceWorkspaceInterface {
 
         @Override
-        Pane getPane() {
+        public Pane getPane() {
             BorderPane borderPane = new BorderPane();
             borderPane.setCenter(new Label("Выберите дочерний ресурс!"));
 

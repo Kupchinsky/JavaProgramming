@@ -22,6 +22,7 @@ import javafx.stage.Stage;
 import lombok.AllArgsConstructor;
 import org.flywaydb.core.Flyway;
 import org.hibernate.Session;
+import ru.killer666.Apteka.domains.Recipe;
 import ru.killer666.Apteka.domains.Role;
 import ru.killer666.trpo.aaa.exceptions.IncorrectPasswordException;
 import ru.killer666.trpo.aaa.exceptions.UserNotFoundException;
@@ -50,12 +51,14 @@ public class Main extends Application {
         } catch (ClassNotFoundException e) {
         }
 
+        HibernateService hibernateService = new HibernateService(JDBC_URL, JDBC_USERNAME, JDBC_PASSWORD, HIBERNATE_DIALECT,
+                Recipe.class);
+
         Flyway flyway = new Flyway();
         flyway.setDataSource(JDBC_URL, JDBC_USERNAME, JDBC_PASSWORD);
         flyway.baseline();
         flyway.migrate();
 
-        HibernateService hibernateService = new HibernateService(JDBC_URL, JDBC_USERNAME, JDBC_PASSWORD, HIBERNATE_DIALECT);
         this.authService = new AuthService(hibernateService, Role.class);
         this.session = hibernateService.getSession();
     }
@@ -122,6 +125,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
 
+        primaryStage.setOnCloseRequest(value -> System.exit(0));
         primaryStage.setTitle("Аптека \"Рашнаптек груп\"");
 
         GridPane grid = new GridPane();
