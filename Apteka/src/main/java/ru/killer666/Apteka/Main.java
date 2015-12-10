@@ -20,7 +20,6 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import lombok.AllArgsConstructor;
-import org.flywaydb.core.Flyway;
 import org.hibernate.Session;
 import org.reflections.Reflections;
 import ru.killer666.Apteka.domains.Role;
@@ -58,11 +57,6 @@ public class Main extends Application {
 
         HibernateService hibernateService = new HibernateService(JDBC_URL, JDBC_USERNAME, JDBC_PASSWORD, HIBERNATE_DIALECT,
                 typesAnnotatedWith.toArray(new Class[typesAnnotatedWith.size()]));
-
-        Flyway flyway = new Flyway();
-        flyway.setDataSource(JDBC_URL, JDBC_USERNAME, JDBC_PASSWORD);
-        flyway.baseline();
-        flyway.migrate();
 
         this.authService = new AuthService(hibernateService, Role.class);
         this.session = hibernateService.getSession();
