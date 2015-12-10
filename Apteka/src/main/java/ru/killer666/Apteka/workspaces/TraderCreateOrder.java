@@ -14,9 +14,13 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import lombok.NonNull;
+import org.hibernate.Transaction;
 import ru.killer666.Apteka.ResourceWorkspaceInterface;
 import ru.killer666.Apteka.domains.Drug;
+import ru.killer666.Apteka.domains.Order;
 import ru.killer666.Apteka.domains.Recipe;
+
+import java.util.Calendar;
 
 @SuppressWarnings("unchecked")
 public class TraderCreateOrder extends ResourceWorkspaceInterface {
@@ -116,7 +120,7 @@ public class TraderCreateOrder extends ResourceWorkspaceInterface {
                 Preconditions.checkArgument(fieldQuantity.getLength() != 0, "Заполните количество");
                 quantity = Integer.parseInt(fieldQuantity.getText());
 
-                Preconditions.checkArgument(drug.getStorageQuantity() >= quantity, "Недопустимое количество! Осталось: " + drug.getStorageQuantity() + " единиц товара");
+                Preconditions.checkArgument(quantity > 0 && drug.getStorageQuantity() >= quantity, "Недопустимое количество! Осталось: " + drug.getStorageQuantity() + " единиц товара");
             } catch (IllegalArgumentException e) {
 
                 Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -126,6 +130,41 @@ public class TraderCreateOrder extends ResourceWorkspaceInterface {
 
                 return;
             }
+
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setHeaderText("Подтверждение создания заказа");
+            alert.setContentText("Вы уверены?");
+
+            if (alert.showAndWait().get() == ButtonType.CANCEL) {
+                return;
+            }
+
+            Transaction tx = this.getSession().beginTransaction();
+
+            Order order = new Order();
+            order.setDrug(drug);
+            order.setQuantity(quantity);
+            order.setTotalPrice(this.calcPrice(drug, quantity));
+            order.setDateSell(Calendar.getInstance().getTime());
+
+            if (!withoutRecipe.isSelected()) {
+                order.setRecipe(fieldRecipe.getSelectionModel().getSelectedItem());
+            }
+
+            this.getSession().save(order);
+
+            drug.setStorageQuantity(drug.getStorageQuantity() - quantity);
+            this.getSession().saveOrUpdate(drug);
+
+            tx.commit();
+
+            fieldQuantity.setText("0");
+            fieldPrice.setText("0");
+
+            alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText("Сообщение");
+            alert.setContentText("Продажа оформлена!");
+            alert.show();
         });
 
         FlowPane pane = new FlowPane();

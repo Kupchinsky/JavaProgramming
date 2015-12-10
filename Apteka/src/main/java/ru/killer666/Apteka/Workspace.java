@@ -23,7 +23,6 @@ import ru.killer666.trpo.aaa.exceptions.ResourceNotFoundException;
 import ru.killer666.trpo.aaa.services.AuthService;
 
 import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
 import java.util.*;
 
 class Workspace {
@@ -93,11 +92,11 @@ class Workspace {
 
             if (alert.showAndWait().get() == ButtonType.OK) {
 
-                try {
+                /*try {
                     this.authService.saveAccounting(this.session);
                 } catch (SQLException e1) {
                     e1.printStackTrace();
-                }
+                }*/
 
                 this.authService.clearAll();
 
