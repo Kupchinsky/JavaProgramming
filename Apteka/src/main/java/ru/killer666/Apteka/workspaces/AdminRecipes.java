@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Transaction;
 import ru.killer666.Apteka.ResourceWorkspaceInterface;
 import ru.killer666.Apteka.domains.Recipe;
+import ru.killer666.Apteka.domains.Role;
 
 import java.lang.reflect.Field;
 
@@ -52,37 +53,40 @@ public class AdminRecipes extends ResourceWorkspaceInterface {
         table.setItems(data);
         borderPane.setCenter(table);
 
-        Button deleteButton = new Button("Удалить");
-        deleteButton.setOnAction(event -> {
-            ObservableList<Recipe> selectedItems = table.getSelectionModel().getSelectedItems();
+        if (this.getRole() == Role.ADMIN) {
+            Button deleteButton = new Button("Удалить");
+            deleteButton.setOnAction(event -> {
+                ObservableList<Recipe> selectedItems = table.getSelectionModel().getSelectedItems();
 
-            if (selectedItems.size() == 0) {
-                return;
-            }
+                if (selectedItems.size() == 0) {
+                    return;
+                }
 
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setHeaderText("Подтверждение удаления");
-            alert.setContentText("Вы уверены?");
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setHeaderText("Подтверждение удаления");
+                alert.setContentText("Вы уверены?");
 
-            if (alert.showAndWait().get() == ButtonType.CANCEL) {
-                return;
-            }
+                if (alert.showAndWait().get() == ButtonType.CANCEL) {
+                    return;
+                }
 
-            Transaction tx = this.getSession().beginTransaction();
+                Transaction tx = this.getSession().beginTransaction();
 
-            for (Recipe recipe : selectedItems) {
-                this.getSession().delete(recipe);
-                data.remove(recipe);
-            }
+                for (Recipe recipe : selectedItems) {
+                    this.getSession().delete(recipe);
+                    data.remove(recipe);
+                }
 
-            tx.commit();
-        });
+                tx.commit();
+            });
 
-        FlowPane pane = new FlowPane();
-        pane.setPadding(new Insets(15, 15, 15, 15));
-        pane.getChildren().add(deleteButton);
+            FlowPane pane = new FlowPane();
+            pane.setPadding(new Insets(15, 15, 15, 15));
+            pane.getChildren().add(deleteButton);
 
-        borderPane.setBottom(pane);
+            borderPane.setBottom(pane);
+        }
+
         return borderPane;
     }
 
@@ -102,25 +106,28 @@ public class AdminRecipes extends ResourceWorkspaceInterface {
 
         TableColumn<Recipe, String> tableColumn = new TableColumn<>(columnDescription);
 
-        tableColumn.setEditable(true);
-        tableColumn.setOnEditCommit(event -> {
-            try {
-                if (field.getType() == String.class) {
-                    field.set(event.getRowValue(), event.getNewValue());
-                } else if (field.getType() == Integer.class || field.getGenericType().getTypeName().equals("int")) {
-                    field.set(event.getRowValue(), Integer.valueOf(event.getNewValue()));
-                } else {
-                    logger.warn("Unknown field type: " + field.getType().getName());
-                }
+        if (this.getRole() == Role.ADMIN) {
+            tableColumn.setEditable(true);
+            tableColumn.setOnEditCommit(event -> {
+                try {
+                    if (field.getType() == String.class) {
+                        field.set(event.getRowValue(), event.getNewValue());
+                    } else if (field.getType() == Integer.class || field.getGenericType().getTypeName().equals("int")) {
+                        field.set(event.getRowValue(), Integer.valueOf(event.getNewValue()));
+                    } else {
+                        logger.warn("Unknown field type: " + field.getType().getName());
+                    }
 
-                Transaction tx = this.getSession().beginTransaction();
-                this.getSession().saveOrUpdate(event.getRowValue());
-                tx.commit();
-            } catch (IllegalAccessException e) {
-                logger.error(e);
-            }
-        });
-        tableColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+                    Transaction tx = this.getSession().beginTransaction();
+                    this.getSession().saveOrUpdate(event.getRowValue());
+                    tx.commit();
+                } catch (IllegalAccessException e) {
+                    logger.error(e);
+                }
+            });
+            tableColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        }
+
         tableColumn.setCellValueFactory(param -> {
             try {
                 return new SimpleStringProperty(String.valueOf(field.get(param.getValue())));

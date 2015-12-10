@@ -175,7 +175,7 @@ class Workspace {
                     buttonResource.setStyle("-fx-background-color: red; -fx-text-fill: white;");
                     infoLabelRole.setText("");
                 }
-                
+
                 workspaceInterface.setResource(resource);
                 workspaceInterface.setRole(role);
                 workspaceInterface.setSession(this.session);

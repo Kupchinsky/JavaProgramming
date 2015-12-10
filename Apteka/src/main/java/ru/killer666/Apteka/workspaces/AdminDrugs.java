@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import org.hibernate.Transaction;
 import ru.killer666.Apteka.ResourceWorkspaceInterface;
 import ru.killer666.Apteka.domains.Drug;
+import ru.killer666.Apteka.domains.Role;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -54,91 +55,94 @@ public class AdminDrugs extends ResourceWorkspaceInterface {
         table.setItems(data);
         borderPane.setCenter(table);
 
-        Button deleteButton = new Button("Удалить");
-        deleteButton.setOnAction(event -> {
-            ObservableList<Drug> selectedItems = table.getSelectionModel().getSelectedItems();
+        if (this.getRole() == Role.ADMIN) {
+            Button deleteButton = new Button("Удалить");
+            deleteButton.setOnAction(event -> {
+                ObservableList<Drug> selectedItems = table.getSelectionModel().getSelectedItems();
 
-            if (selectedItems.size() == 0) {
-                return;
-            }
-
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setHeaderText("Подтверждение удаления");
-            alert.setContentText("Вы уверены?");
-
-            if (alert.showAndWait().get() == ButtonType.CANCEL) {
-                return;
-            }
-
-            Transaction tx = this.getSession().beginTransaction();
-
-            for (Drug recipe : selectedItems) {
-                this.getSession().delete(recipe);
-                data.remove(recipe);
-            }
-
-            tx.commit();
-        });
-
-        Button addButton = new Button("Добавить");
-        addButton.setOnAction(event -> {
-            Drug drug = new Drug();
-
-            this.newItems.add(drug);
-            data.add(drug);
-        });
-
-        Button saveButton = new Button("Сохранить");
-        saveButton.setOnAction(event -> {
-            ObservableList<Drug> selectedItems = table.getSelectionModel().getSelectedItems();
-
-            if (selectedItems.size() == 0) {
-                return;
-            }
-
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setHeaderText("Подтверждение сохранения");
-            alert.setContentText("Вы уверены?");
-
-            if (alert.showAndWait().get() == ButtonType.CANCEL) {
-                return;
-            }
-
-            Transaction tx = this.getSession().beginTransaction();
-            int saved = 0;
-
-            try {
-                for (Drug drug : selectedItems) {
-
-                    if (!this.newItems.contains(drug)) {
-                        continue;
-                    }
-
-                    this.getSession().save(drug);
-                    this.newItems.remove(drug);
-                    saved++;
+                if (selectedItems.size() == 0) {
+                    return;
                 }
-            } catch (Exception e) {
-                logger.error(e);
-            }
 
-            tx.commit();
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setHeaderText("Подтверждение удаления");
+                alert.setContentText("Вы уверены?");
 
-            alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setHeaderText("Информация");
-            alert.setContentText("Сохранено " + saved + " новых записей");
-            alert.show();
-        });
+                if (alert.showAndWait().get() == ButtonType.CANCEL) {
+                    return;
+                }
 
-        FlowPane pane = new FlowPane();
-        pane.setPadding(new Insets(15, 15, 15, 15));
-        pane.setHgap(5);
-        pane.setVgap(5);
-        pane.getChildren().add(deleteButton);
-        pane.getChildren().add(addButton);
-        pane.getChildren().add(saveButton);
+                Transaction tx = this.getSession().beginTransaction();
 
-        borderPane.setBottom(pane);
+                for (Drug recipe : selectedItems) {
+                    this.getSession().delete(recipe);
+                    data.remove(recipe);
+                }
+
+                tx.commit();
+            });
+
+            Button addButton = new Button("Добавить");
+            addButton.setOnAction(event -> {
+                Drug drug = new Drug();
+
+                this.newItems.add(drug);
+                data.add(drug);
+            });
+
+            Button saveButton = new Button("Сохранить");
+            saveButton.setOnAction(event -> {
+                ObservableList<Drug> selectedItems = table.getSelectionModel().getSelectedItems();
+
+                if (selectedItems.size() == 0) {
+                    return;
+                }
+
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setHeaderText("Подтверждение сохранения");
+                alert.setContentText("Вы уверены?");
+
+                if (alert.showAndWait().get() == ButtonType.CANCEL) {
+                    return;
+                }
+
+                Transaction tx = this.getSession().beginTransaction();
+                int saved = 0;
+
+                try {
+                    for (Drug drug : selectedItems) {
+
+                        if (!this.newItems.contains(drug)) {
+                            continue;
+                        }
+
+                        this.getSession().save(drug);
+                        this.newItems.remove(drug);
+                        saved++;
+                    }
+                } catch (Exception e) {
+                    logger.error(e);
+                }
+
+                tx.commit();
+
+                alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setHeaderText("Информация");
+                alert.setContentText("Сохранено " + saved + " новых записей");
+                alert.show();
+            });
+
+            FlowPane pane = new FlowPane();
+            pane.setPadding(new Insets(15, 15, 15, 15));
+            pane.setHgap(5);
+            pane.setVgap(5);
+            pane.getChildren().add(deleteButton);
+            pane.getChildren().add(addButton);
+            pane.getChildren().add(saveButton);
+
+            borderPane.setBottom(pane);
+        }
+
         return borderPane;
     }
 
@@ -158,27 +162,30 @@ public class AdminDrugs extends ResourceWorkspaceInterface {
 
         TableColumn<Drug, String> tableColumn = new TableColumn<>(columnDescription);
 
-        tableColumn.setEditable(true);
-        tableColumn.setOnEditCommit(event -> {
-            try {
-                if (field.getType() == String.class) {
-                    field.set(event.getRowValue(), event.getNewValue());
-                } else if (field.getType() == Integer.class || field.getGenericType().getTypeName().equals("int")) {
-                    field.set(event.getRowValue(), Integer.valueOf(event.getNewValue()));
-                } else {
-                    logger.warn("Unknown field type: " + field.getType().getName());
-                }
+        if (this.getRole() == Role.ADMIN) {
+            tableColumn.setEditable(true);
+            tableColumn.setOnEditCommit(event -> {
+                try {
+                    if (field.getType() == String.class) {
+                        field.set(event.getRowValue(), event.getNewValue());
+                    } else if (field.getType() == Integer.class || field.getGenericType().getTypeName().equals("int")) {
+                        field.set(event.getRowValue(), Integer.valueOf(event.getNewValue()));
+                    } else {
+                        logger.warn("Unknown field type: " + field.getType().getName());
+                    }
 
-                if (!this.newItems.contains(event.getRowValue())) {
-                    Transaction tx = this.getSession().beginTransaction();
-                    this.getSession().saveOrUpdate(event.getRowValue());
-                    tx.commit();
+                    if (!this.newItems.contains(event.getRowValue())) {
+                        Transaction tx = this.getSession().beginTransaction();
+                        this.getSession().saveOrUpdate(event.getRowValue());
+                        tx.commit();
+                    }
+                } catch (IllegalAccessException e) {
+                    logger.error(e);
                 }
-            } catch (IllegalAccessException e) {
-                logger.error(e);
-            }
-        });
-        tableColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+            });
+            tableColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        }
+
         tableColumn.setCellValueFactory(param -> {
             try {
                 return new SimpleStringProperty(String.valueOf(field.get(param.getValue())));
