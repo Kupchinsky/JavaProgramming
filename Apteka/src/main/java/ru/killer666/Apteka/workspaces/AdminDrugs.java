@@ -129,6 +129,8 @@ public class AdminDrugs extends ResourceWorkspaceInterface {
 
         FlowPane pane = new FlowPane();
         pane.setPadding(new Insets(15, 15, 15, 15));
+        pane.setHgap(5);
+        pane.setVgap(5);
         pane.getChildren().add(deleteButton);
         pane.getChildren().add(addButton);
         pane.getChildren().add(saveButton);
@@ -164,9 +166,11 @@ public class AdminDrugs extends ResourceWorkspaceInterface {
                     logger.warn("Unknown field type: " + field.getType().getName());
                 }
 
-                Transaction tx = this.getSession().beginTransaction();
-                this.getSession().saveOrUpdate(event.getRowValue());
-                tx.commit();
+                if (!this.newItems.contains(event.getRowValue())) {
+                    Transaction tx = this.getSession().beginTransaction();
+                    this.getSession().saveOrUpdate(event.getRowValue());
+                    tx.commit();
+                }
             } catch (IllegalAccessException e) {
                 logger.error(e);
             }
